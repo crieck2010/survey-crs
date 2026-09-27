@@ -34,6 +34,12 @@ def test_search_case_insensitive_and_empty():
     assert crs.search("zzzz-no-such-crs") == []
 
 
+def test_search_multiword_tokens():
+    hits = crs.search("utm 18n")
+    assert [e.epsg for e in hits] == [32618]
+    assert [e.epsg for e in crs.search("utm 18s")] == [32718]
+
+
 def test_zones_for_state_abbr_and_name():
     abbr = crs.zones_for_state("NY")
     name = crs.zones_for_state("New York")

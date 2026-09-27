@@ -45,21 +45,22 @@ def by_epsg(code: int) -> CrsEntry:
 
 
 def search(query: str, limit: Optional[int] = None) -> List[CrsEntry]:
-    """Case-insensitive substring search over name, state, zone, EPSG, area.
+    """Case-insensitive token search over name, state, zone, EPSG, area.
 
-    Name matches rank before area-of-use matches; results are EPSG-sorted
+    Every whitespace-separated token must appear in the entry's text;
+    name matches rank before area-of-use matches; results are EPSG-sorted
     within each rank.
     """
-    q = query.strip().lower()
-    if not q:
+    tokens = query.strip().lower().split()
+    if not tokens:
         return []
     name_hits, other_hits = [], []
     for e in registry.list_entries():
         hay_name = " ".join([e.name, e.state or "", e.zone or "",
                              str(e.epsg)]).lower()
-        if q in hay_name:
+        if all(t in hay_name for t in tokens):
             name_hits.append(e)
-        elif q in (e.area_name or "").lower():
+        elif all(t in (e.area_name or "").lower() for t in tokens):
             other_hits.append(e)
     name_hits.sort(key=lambda e: e.epsg)
     other_hits.sort(key=lambda e: e.epsg)
